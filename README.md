@@ -43,3 +43,10 @@ docker compose up
 git config user.name "Caleb Powell"
 git config user.email "capowell@brasfieldgorrie.com"
 ```
+
+```bash
+git config user.name "Gabriel McMillan"
+git config user.email "gabezmcmillan@gmail.com"
+```
+
+https://abyz.me.uk/rpi/pigpio/download.html

@@ -1,7 +1,11 @@
 services:
-  motors:
+  rover:
     build: .
     privileged: true
+    network_mode: host
     volumes:
-      - ./test_motors.py:/ros_ws/test_motors.py
-    command: python3 /ros_ws/test_motors.py
+      - ./motor_node.py:/ros_ws/motor_node.py
+    command: >
+      bash -c "source /opt/ros/humble/setup.bash &&
+               ros2 run foxglove_bridge foxglove_bridge &
+               python3 /ros_ws/motor_node.py"
