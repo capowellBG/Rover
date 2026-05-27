@@ -1,11 +1,17 @@
 services:
-  rover:
+  foxglove_bridge:
+    build: .
+    network_mode: host
+    environment:
+      - FASTDDS_BUILTIN_TRANSPORTS=UDPv4
+    command: bash -c "source /opt/ros/humble/setup.bash && ros2 run foxglove_bridge foxglove_bridge"
+
+  motor_driver:
     build: .
     privileged: true
     network_mode: host
+    environment:
+      - FASTDDS_BUILTIN_TRANSPORTS=UDPv4
     volumes:
       - ./motor_node.py:/ros_ws/motor_node.py
-    command: >
-      bash -c "source /opt/ros/humble/setup.bash &&
-               ros2 run foxglove_bridge foxglove_bridge &
-               python3 /ros_ws/motor_node.py"
+    command: bash -c "source /opt/ros/humble/setup.bash && python3 /ros_ws/motor_node.py"
