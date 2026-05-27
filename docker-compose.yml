@@ -1,0 +1,7 @@
+services:
+  motors:
+    build: .
+    privileged: true
+    volumes:
+      - ./test_motors.py:/ros_ws/test_motors.py
+    command: python3 /ros_ws/test_motors.py
