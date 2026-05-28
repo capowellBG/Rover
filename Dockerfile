@@ -58,4 +58,9 @@ RUN git clone https://github.com/pololu/dual-g2-high-power-motor-driver-rpi \
     && cd .. \
     && rm -rf dual-g2-high-power-motor-driver-rpi
 
+RUN apt-get update && apt-get install -y \
+    ros-humble-rtabmap-ros \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /ros_ws

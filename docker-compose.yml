@@ -29,3 +29,32 @@ services:
       - ./cyclone_config.xml:/cyclone_config.xml:ro
       - ./camera_config.yaml:/camera_config.yaml:ro
     command: ros2 launch realsense2_camera rs_launch.py config_file:=/camera_config.yaml
+
+  camera_tf:
+    <<: *base
+    command: >-
+      ros2 run tf2_ros static_transform_publisher
+        --frame-id base_link
+        --child-frame-id camera_link
+        --x 0 --y 0 --z 0
+        --roll 3.14159
+        --pitch -0.785
+        --yaw 0.0
+
+  rtabmap:
+    <<: *base
+    volumes:
+      - ./cyclone_config.xml:/cyclone_config.xml:ro
+      - ./rtabmap_config.ini:/rtabmap_config.ini:ro
+    command: >-
+      ros2 launch rtabmap_launch rtabmap.launch.py
+        rgb_topic:=/camera/camera/color/image_raw
+        depth_topic:=/camera/camera/aligned_depth_to_color/image_raw
+        camera_info_topic:=/camera/camera/color/camera_info
+        imu_topic:=/camera/camera/imu
+        frame_id:=base_link
+        cfg:=/rtabmap_config.ini
+        qos:=1
+        delete_db_on_start:=true
+        rviz:=false
+        rtabmap_viz:=false
