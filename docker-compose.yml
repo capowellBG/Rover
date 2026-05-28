@@ -1,17 +1,25 @@
+x-service: &base
+  build: .
+  network_mode: host
+  entrypoint: /ros_entrypoint.sh
+  environment:
+    - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+
 services:
   foxglove_bridge:
-    build: .
-    network_mode: host
-    environment:
-      - FASTDDS_BUILTIN_TRANSPORTS=UDPv4
-    command: bash -c "source /opt/ros/humble/setup.bash && ros2 run foxglove_bridge foxglove_bridge"
+    <<: *base
+    command: ros2 run foxglove_bridge foxglove_bridge --ros-args -p send_buffer_limit:=500000
 
   motor_driver:
-    build: .
+    <<: *base
     privileged: true
-    network_mode: host
-    environment:
-      - FASTDDS_BUILTIN_TRANSPORTS=UDPv4
     volumes:
       - ./motor_node.py:/ros_ws/motor_node.py
-    command: bash -c "source /opt/ros/humble/setup.bash && python3 /ros_ws/motor_node.py"
+    command: python3 /ros_ws/motor_node.py
+
+  camera:
+    <<: *base
+    privileged: true
+    devices:
+      - /dev/bus/usb:/dev/bus/usb
+    command: ros2 launch realsense2_camera rs_launch.py rgb_camera.color_profile:=424x240x5 depth_module.depth_profile:=424x240x5 image_qos:=SENSOR_DATA enable_depth:=false

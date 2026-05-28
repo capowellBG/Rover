@@ -9,9 +9,13 @@ RUN apt-get update && apt-get install -y \
     make \
     gcc \
     git \
+    ros-humble-rmw-cyclonedds-cpp \
     ros-humble-rclpy \
     ros-humble-geometry-msgs \
     ros-humble-foxglove-bridge \
+    ros-humble-librealsense2* \
+    ros-humble-realsense2-camera \
+    ros-humble-image-transport-plugins \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
