@@ -5,6 +5,7 @@ x-service: &base
   volumes:
     - ./cyclone_config.xml:/cyclone_config.xml:ro
     - ./motor_node.py:/ros_ws/motor_node.py
+    - ./camera_config.yaml:/camera_config.yaml:ro
   environment:
     - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
     - CYCLONEDDS_URI=file:///cyclone_config.xml
@@ -24,4 +25,7 @@ services:
     privileged: true
     devices:
       - /dev/bus/usb:/dev/bus/usb
-    command: ros2 launch realsense2_camera rs_launch.py rgb_camera.color_profile:=424x240x15 depth_module.depth_profile:=424x240x15 image_qos:=SENSOR_DATA enable_depth:=false
+    volumes:
+      - ./cyclone_config.xml:/cyclone_config.xml:ro
+      - ./camera_config.yaml:/camera_config.yaml:ro
+    command: ros2 launch realsense2_camera rs_launch.py config_file:=/camera_config.yaml

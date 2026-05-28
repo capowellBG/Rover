@@ -9,6 +9,10 @@ RUN apt-get update && apt-get install -y \
     make \
     gcc \
     git \
+    cmake \
+    libusb-1.0-0-dev \
+    libssl-dev \
+    pkg-config \
     ros-humble-rmw-cyclonedds-cpp \
     ros-humble-rclpy \
     ros-humble-geometry-msgs \
@@ -18,6 +22,25 @@ RUN apt-get update && apt-get install -y \
     ros-humble-image-transport-plugins \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
+
+# Rebuild librealsense with RSUSB backend so IMU works without Intel's kernel patches.
+# The apt package uses the V4L2+IIO backend which requires a d4xx-class kernel module
+# that doesn't exist on Raspberry Pi OS. RSUSB uses libusb directly and needs no patches.
+RUN git clone https://github.com/IntelRealSense/librealsense.git -b v2.57.7 --depth 1 \
+    && cd librealsense \
+    && mkdir build && cd build \
+    && cmake .. \
+        -DFORCE_RSUSB_BACKEND=ON \
+        -DCMAKE_INSTALL_PREFIX=/opt/ros/humble \
+        -DCMAKE_INSTALL_LIBDIR=lib/aarch64-linux-gnu \
+        -DBUILD_EXAMPLES=OFF \
+        -DBUILD_GRAPHICAL_EXAMPLES=OFF \
+        -DBUILD_PYTHON_BINDINGS=OFF \
+        -DBUILD_UNIT_TESTS=OFF \
+        -DCMAKE_BUILD_TYPE=Release \
+    && make -j$(nproc) \
+    && make install \
+    && cd / && rm -rf librealsense
 
 # Build and install pigpio from source (not in apt repos on Bookworm)
 RUN wget https://github.com/joan2937/pigpio/archive/master.zip \
