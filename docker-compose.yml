@@ -2,8 +2,12 @@ x-service: &base
   build: .
   network_mode: host
   entrypoint: /ros_entrypoint.sh
+  volumes:
+    - ./cyclone_config.xml:/cyclone_config.xml:ro
+    - ./motor_node.py:/ros_ws/motor_node.py
   environment:
     - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+    - CYCLONEDDS_URI=file:///cyclone_config.xml
 
 services:
   foxglove_bridge:
@@ -13,8 +17,6 @@ services:
   motor_driver:
     <<: *base
     privileged: true
-    volumes:
-      - ./motor_node.py:/ros_ws/motor_node.py
     command: python3 /ros_ws/motor_node.py
 
   camera:
@@ -22,4 +24,4 @@ services:
     privileged: true
     devices:
       - /dev/bus/usb:/dev/bus/usb
-    command: ros2 launch realsense2_camera rs_launch.py rgb_camera.color_profile:=424x240x5 depth_module.depth_profile:=424x240x5 image_qos:=SENSOR_DATA enable_depth:=false
+    command: ros2 launch realsense2_camera rs_launch.py rgb_camera.color_profile:=424x240x15 depth_module.depth_profile:=424x240x15 image_qos:=SENSOR_DATA enable_depth:=false
