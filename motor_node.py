@@ -1,5 +1,6 @@
 import rclpy
 from rclpy.node import Node
+from rclpy.executors import ExternalShutdownException
 from geometry_msgs.msg import Twist
 from dual_g2_hpmd_rpi import motors, MAX_SPEED
 
@@ -15,7 +16,7 @@ class MotorDriverNode(Node):
         self.get_logger().info('Motor driver node started')
 
     def on_cmd_vel(self, msg):
-        linear = msg.linear.x    # -1.0 to 1.0
+        linear = -msg.linear.x   # -1.0 to 1.0
         angular = msg.angular.z  # -1.0 to 1.0
 
         left = max(-1.0, min(1.0, linear - angular))
@@ -38,10 +39,13 @@ def main():
     node = MotorDriverNode()
     try:
         rclpy.spin(node)
+    except (KeyboardInterrupt, ExternalShutdownException):
+        pass
     finally:
         motors.forceStop()
         node.destroy_node()
-        rclpy.shutdown()
+        if rclpy.ok():
+            rclpy.shutdown()
 
 
 if __name__ == '__main__':
