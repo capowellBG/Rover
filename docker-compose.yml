@@ -38,7 +38,7 @@ services:
         --child-frame-id camera_link
         --x 0 --y 0 --z 0
         --roll 3.14159
-        --pitch -0.785
+        --pitch -0.401
         --yaw 0.0
 
   rtabmap:

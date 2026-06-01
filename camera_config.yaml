@@ -1,5 +1,5 @@
-rgb_camera.color_profile: "640x480x30"
-depth_module.depth_profile: "640x480x30"
+rgb_camera.color_profile: "640x480x15"
+depth_module.depth_profile: "640x480x15"
 align_depth.enable: true
 enable_gyro: true
 enable_accel: true
