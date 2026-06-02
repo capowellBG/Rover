@@ -1,3 +1,4 @@
 master.zip
 pigpio-master/
 rtabmap_data/
+**/__pycache__/

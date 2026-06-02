@@ -4,10 +4,11 @@
   <material name="gray"><color rgba="0.3 0.3 0.3 1.0"/></material>
   <material name="black"><color rgba="0.06 0.06 0.06 1.0"/></material>
   <material name="tread"><color rgba="0.22 0.22 0.22 1.0"/></material>
+  <material name="yellow"><color rgba="1.0 0.9 0.0 1.0"/></material>
 
   <!-- Tune these to change tread appearance across all wheels -->
-  <xacro:property name="wheel_radius"   value="0.080"/>
-  <xacro:property name="wheel_length"   value="0.070"/>
+  <xacro:property name="wheel_radius"   value="0.0762"/>
+  <xacro:property name="wheel_length"   value="0.04445"/>
   <xacro:property name="tread_diameter" value="0.012"/> <!-- groove depth in diameter units; inner_r = wheel_radius - tread_diameter/2 -->
   <xacro:property name="tread_count"    value="8"/>
   <xacro:property name="tread_gap"      value="0.008"/> <!-- tangential gap between blocks (m) -->
@@ -20,8 +21,10 @@
   <xacro:property name="tread_block_l" value="${wheel_length - 0.015}"/>
 
   <link name="base_link">
-    <visual><geometry><box size="0.35 0.28 0.05"/></geometry><origin xyz="0 0 -0.025"/><material name="gray"/></visual>
-    <collision><geometry><box size="0.35 0.28 0.05"/></geometry></collision>
+    <visual><geometry><box size="0.254 0.2159 0.05"/></geometry><origin xyz="0 0 -0.025"/><material name="gray"/></visual>
+    <visual><geometry><box size="0.127 0.0762 0.1016"/></geometry><origin xyz="-0.0635 0 0.0508"/><material name="yellow"/></visual>
+    <collision><geometry><box size="0.254 0.2159 0.05"/></geometry></collision>
+    <collision><geometry><box size="0.127 0.0762 0.1016"/></geometry><origin xyz="-0.0635 0 0.0508"/></collision>
     <inertial><mass value="2.7"/><inertia ixx="0.02" ixy="0" ixz="0" iyy="0.02" iyz="0" izz="0.02"/></inertial>
   </link>
 
@@ -61,9 +64,9 @@
     </joint>
   </xacro:macro>
 
-  <xacro:wheel name="front_left"  x=" 0.125" y=" 0.16"/>
-  <xacro:wheel name="front_right" x=" 0.125" y="-0.16"/>
-  <xacro:wheel name="rear_left"   x="-0.125" y=" 0.16"/>
-  <xacro:wheel name="rear_right"  x="-0.125" y="-0.16"/>
+  <xacro:wheel name="front_left"  x=" 0.1016" y=" 0.13335"/>
+  <xacro:wheel name="front_right" x=" 0.1016" y="-0.13335"/>
+  <xacro:wheel name="rear_left"   x="-0.1016" y=" 0.13335"/>
+  <xacro:wheel name="rear_right"  x="-0.1016" y="-0.13335"/>
 
 </robot>
