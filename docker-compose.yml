@@ -27,14 +27,14 @@ services:
       - /dev/bus/usb:/dev/bus/usb
     command: ros2 launch realsense2_camera rs_launch.py config_file:=/ros_ws/config/camera_config.yaml
 
-  # camera_tf:
-  #   <<: *base
-  #   command: >-
-  #     ros2 run tf2_ros static_transform_publisher
-  #       --frame-id base_link
-  #       --child-frame-id camera_link
-  #       --x 0 --y 0 --z 0
-  #       --roll 0 --pitch 0 --yaw 0
+  camera_tf:
+    <<: *base
+    command: >-
+      ros2 run tf2_ros static_transform_publisher
+        --frame-id base_link
+        --child-frame-id camera_link
+        --x 0 --y 0 --z 0.2667
+        --roll 0 --pitch 0 --yaw 0
   
   # rtabmap:
   #   <<: *base
