@@ -1,15 +1,11 @@
 x-service: &base
   image: rover:latest
   network_mode: host
+  ipc: host
   entrypoint: /ros_entrypoint.sh
   volumes:
-    - ./cyclone_config.xml:/cyclone_config.xml:ro
     - ./motor_node.py:/ros_ws/motor_node.py
     - ./camera_config.yaml:/camera_config.yaml:ro
-  environment:
-    - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
-    - CYCLONEDDS_URI=file:///cyclone_config.xml
-
 services:
   foxglove_bridge:
     <<: *base
