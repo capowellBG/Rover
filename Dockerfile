@@ -13,15 +13,24 @@ RUN apt-get update && apt-get install -y \
     libusb-1.0-0-dev \
     libssl-dev \
     pkg-config \
-    ros-humble-rmw-cyclonedds-cpp \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install ROS Packages
+RUN apt-get update && apt-get install -y \
     ros-humble-rclpy \
     ros-humble-geometry-msgs \
     ros-humble-foxglove-bridge \
     ros-humble-librealsense2* \
     ros-humble-realsense2-camera \
     ros-humble-image-transport-plugins \
+    ros-humble-rtabmap-ros \
+    ros-humble-robot-state-publisher \
+    ros-humble-joint-state-publisher \
+    ros-humble-xacro \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
+
 
 # Rebuild librealsense with RSUSB backend so IMU works without Intel's kernel patches.
 # The apt package uses the V4L2+IIO backend which requires a d4xx-class kernel module
@@ -57,10 +66,5 @@ RUN git clone https://github.com/pololu/dual-g2-high-power-motor-driver-rpi \
     && python3 setup.py install \
     && cd .. \
     && rm -rf dual-g2-high-power-motor-driver-rpi
-
-RUN apt-get update && apt-get install -y \
-    ros-humble-rtabmap-ros \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /ros_ws

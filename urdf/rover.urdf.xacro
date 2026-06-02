@@ -1,0 +1,69 @@
+<?xml version="1.0"?>
+<robot name="rover" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <material name="gray"><color rgba="0.3 0.3 0.3 1.0"/></material>
+  <material name="black"><color rgba="0.06 0.06 0.06 1.0"/></material>
+  <material name="tread"><color rgba="0.22 0.22 0.22 1.0"/></material>
+
+  <!-- Tune these to change tread appearance across all wheels -->
+  <xacro:property name="wheel_radius"   value="0.080"/>
+  <xacro:property name="wheel_length"   value="0.070"/>
+  <xacro:property name="tread_diameter" value="0.012"/> <!-- groove depth in diameter units; inner_r = wheel_radius - tread_diameter/2 -->
+  <xacro:property name="tread_count"    value="8"/>
+  <xacro:property name="tread_gap"      value="0.008"/> <!-- tangential gap between blocks (m) -->
+
+  <!-- Derived tread geometry (computed once from properties above) -->
+  <xacro:property name="tread_inner_r" value="${wheel_radius - tread_diameter / 2.0}"/>
+  <xacro:property name="tread_block_r" value="${wheel_radius - tread_diameter / 4.0}"/>
+  <xacro:property name="tread_block_h" value="${tread_diameter / 2.0}"/>
+  <xacro:property name="tread_block_w" value="${2.0 * pi * tread_block_r / tread_count - tread_gap}"/>
+  <xacro:property name="tread_block_l" value="${wheel_length - 0.015}"/>
+
+  <link name="base_link">
+    <visual><geometry><box size="0.35 0.28 0.05"/></geometry><origin xyz="0 0 -0.025"/><material name="gray"/></visual>
+    <collision><geometry><box size="0.35 0.28 0.05"/></geometry></collision>
+    <inertial><mass value="2.7"/><inertia ixx="0.02" ixy="0" ixz="0" iyy="0.02" iyz="0" izz="0.02"/></inertial>
+  </link>
+
+  <!-- Single tread block geometry, positioned by angle -->
+  <xacro:macro name="tread_block" params="angle">
+    <visual>
+      <geometry><box size="${tread_block_h} ${tread_block_w} ${tread_block_l}"/></geometry>
+      <origin xyz="${tread_block_r * cos(angle)} ${tread_block_r * sin(angle)} 0" rpy="0 0 ${angle}"/>
+      <material name="tread"/>
+    </visual>
+  </xacro:macro>
+
+  <!-- Recursively place n tread blocks evenly spaced by step radians -->
+  <xacro:macro name="tread_blocks" params="n angle step">
+    <xacro:if value="${n > 0}">
+      <xacro:tread_block angle="${angle}"/>
+      <xacro:tread_blocks n="${n - 1}" angle="${angle + step}" step="${step}"/>
+    </xacro:if>
+  </xacro:macro>
+
+  <!-- Full tread: groove-floor cylinder + evenly spaced tread blocks -->
+  <xacro:macro name="tread">
+    <visual><geometry><cylinder radius="${tread_inner_r}" length="${wheel_length}"/></geometry><material name="black"/></visual>
+    <xacro:tread_blocks n="${tread_count}" angle="0" step="${2.0 * pi / tread_count}"/>
+  </xacro:macro>
+
+  <xacro:macro name="wheel" params="name x y">
+    <link name="${name}_wheel">
+      <xacro:tread/>
+      <collision><geometry><cylinder radius="${wheel_radius}" length="${wheel_length}"/></geometry></collision>
+      <inertial><mass value="0.3"/><inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/></inertial>
+    </link>
+    <joint name="${name}_joint" type="continuous">
+      <parent link="base_link"/><child link="${name}_wheel"/>
+      <origin xyz="${x} ${y} -0.025" rpy="1.5708 0 0"/>
+      <axis xyz="0 0 1"/>
+    </joint>
+  </xacro:macro>
+
+  <xacro:wheel name="front_left"  x=" 0.125" y=" 0.16"/>
+  <xacro:wheel name="front_right" x=" 0.125" y="-0.16"/>
+  <xacro:wheel name="rear_left"   x="-0.125" y=" 0.16"/>
+  <xacro:wheel name="rear_right"  x="-0.125" y="-0.16"/>
+
+</robot>
