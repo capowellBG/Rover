@@ -4,8 +4,8 @@ x-service: &base
   ipc: host
   entrypoint: /ros_entrypoint.sh
   volumes:
-    - ./motor_node.py:/ros_ws/motor_node.py
-    - ./camera_config.yaml:/camera_config.yaml:ro
+    - .:/ros_ws
+
 services:
   foxglove_bridge:
     <<: *base
@@ -21,10 +21,7 @@ services:
     privileged: true
     devices:
       - /dev/bus/usb:/dev/bus/usb
-    volumes:
-      - ./cyclone_config.xml:/cyclone_config.xml:ro
-      - ./camera_config.yaml:/camera_config.yaml:ro
-    command: ros2 launch realsense2_camera rs_launch.py config_file:=/camera_config.yaml
+    command: ros2 launch realsense2_camera rs_launch.py config_file:=/ros_ws/config/camera_config.yaml
 
   camera_tf:
     <<: *base
@@ -37,10 +34,6 @@ services:
 
   rtabmap:
     <<: *base
-    volumes:
-      - ./cyclone_config.xml:/cyclone_config.xml:ro
-      - ./rtabmap_config.ini:/rtabmap_config.ini:ro
-      - ./rtabmap_data:/data
     command: >-
       ros2 launch rtabmap_launch rtabmap.launch.py
         rgb_topic:=/camera/camera/color/image_raw
@@ -48,8 +41,8 @@ services:
         camera_info_topic:=/camera/camera/color/camera_info
         imu_topic:=/camera/camera/imu
         frame_id:=base_link
-        cfg:=/rtabmap_config.ini
-        database_path:=/data/rtabmap.db
+        cfg:=/ros_ws/config/rtabmap_config.ini
+        database_path:=/ros_ws/rtabmap_data/rtabmap.db
         qos:=1
         delete_db_on_start:=true
         rviz:=false
