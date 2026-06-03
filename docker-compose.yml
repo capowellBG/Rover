@@ -20,21 +20,30 @@ services:
     privileged: true
     command: python3 /ros_ws/motor_node.py
 
-  camera:
+  lidar:
     <<: *base
     privileged: true
     devices:
-      - /dev/bus/usb:/dev/bus/usb
-    command: ros2 launch realsense2_camera rs_launch.py config_file:=/ros_ws/config/camera_config.yaml
-
-  camera_tf:
-    <<: *base
+      - /dev/ttyUSB0:/dev/ttyUSB0
     command: >-
-      ros2 run tf2_ros static_transform_publisher
-        --frame-id base_link
-        --child-frame-id camera_link
-        --x 0 --y 0 --z 0.2667
-        --roll 0 --pitch 0 --yaw 0
+      ros2 launch rplidar_ros rplidar_a2m12_launch.py
+        serial_port:=/dev/ttyUSB0
+
+  # camera:
+  #   <<: *base
+  #   privileged: true
+  #   devices:
+  #     - /dev/bus/usb:/dev/bus/usb
+  #   command: ros2 launch realsense2_camera rs_launch.py config_file:=/ros_ws/config/camera_config.yaml
+
+  # camera_tf:
+  #   <<: *base
+  #   command: >-
+  #     ros2 run tf2_ros static_transform_publisher
+  #       --frame-id base_link
+  #       --child-frame-id camera_link
+  #       --x 0.0381 --y 0 --z 0.2667
+  #       --roll 0 --pitch 0 --yaw 0
   
   # rtabmap:
   #   <<: *base
