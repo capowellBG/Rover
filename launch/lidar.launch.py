@@ -1,0 +1,45 @@
+from launch import LaunchDescription
+from launch_ros.actions import Node
+
+
+def generate_launch_description():
+    return LaunchDescription([
+        Node(
+            package='rplidar_ros',
+            executable='rplidar_node',
+            name='rplidar_node',
+            parameters=[{
+                'channel_type': 'serial',
+                'serial_port': '/dev/ttyUSB0',
+                'serial_baudrate': 256000,
+                'frame_id': 'laser',
+                'inverted': False,
+                'angle_compensate': True,
+                'scan_mode': 'Sensitivity',
+            }],
+            output='screen',
+        ),
+
+        Node(
+            package='rf2o_laser_odometry',
+            executable='rf2o_laser_odometry_node',
+            name='rf2o_laser_odometry',
+            parameters=[{
+                'laser_scan_topic': '/scan',
+                'odom_topic': '/odom',
+                'publish_tf': True,
+                'base_frame_id': 'base_link',
+                'odom_frame_id': 'odom',
+                'freq': 10.0,
+            }],
+            output='screen',
+        ),
+
+        Node(
+            package='slam_toolbox',
+            executable='async_slam_toolbox_node',
+            name='slam_toolbox',
+            parameters=['/ros_ws/config/slam_toolbox_params.yaml'],
+            output='screen',
+        ),
+    ])

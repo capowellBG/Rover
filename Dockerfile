@@ -1,6 +1,8 @@
 FROM ros:humble-ros-core
 
 # Install system dependencies
+#   libusb-1.0-0-dev
+#   libssl-dev
 RUN apt-get update && apt-get install -y \
     python3-pip \
     python3-setuptools \
@@ -10,25 +12,24 @@ RUN apt-get update && apt-get install -y \
     gcc \
     git \
     cmake \
-    libusb-1.0-0-dev \
-    libssl-dev \
     pkg-config \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 # Install ROS Packages
+#   ros-humble-joint-state-publisher
+#   ros-humble-librealsense2*
+#   ros-humble-realsense2-camera
+#   ros-humble-image-transport-plugins
+#   ros-humble-rtabmap-ros
 RUN apt-get update && apt-get install -y \
     ros-humble-rclpy \
     ros-humble-geometry-msgs \
     ros-humble-foxglove-bridge \
-    ros-humble-librealsense2* \
-    ros-humble-realsense2-camera \
-    ros-humble-image-transport-plugins \
-    ros-humble-rtabmap-ros \
     ros-humble-robot-state-publisher \
-    ros-humble-joint-state-publisher \
     ros-humble-xacro \
     python3-colcon-common-extensions \
+    ros-humble-slam-toolbox \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -68,9 +69,10 @@ RUN git clone https://github.com/pololu/dual-g2-high-power-motor-driver-rpi \
     && cd .. \
     && rm -rf dual-g2-high-power-motor-driver-rpi
 
-# Build rplidar_ros from source into its own overlay — apt package has a buffer overflow bug
+# Build rplidar_ros and rf2o_laser_odometry from source into a shared overlay
 RUN mkdir -p /rplidar_ws/src \
     && git clone -b ros2 --depth 1 https://github.com/Slamtec/rplidar_ros.git /rplidar_ws/src/rplidar_ros \
+    && git clone -b ros2 --depth 1 https://github.com/MAPIRlab/rf2o_laser_odometry.git /rplidar_ws/src/rf2o_laser_odometry \
     && cd /rplidar_ws \
     && . /opt/ros/humble/setup.sh \
     && colcon build \

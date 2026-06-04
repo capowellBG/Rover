@@ -25,9 +25,7 @@ services:
     privileged: true
     devices:
       - /dev/ttyUSB0:/dev/ttyUSB0
-    command: >-
-      ros2 launch rplidar_ros rplidar_a2m12_launch.py
-        serial_port:=/dev/ttyUSB0
+    command: ros2 launch launch/lidar.launch.py
 
   # camera:
   #   <<: *base
