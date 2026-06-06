@@ -31,11 +31,8 @@ def generate_launch_description():
                 'base_frame_id': 'base_footprint',
                 'odom_frame_id': 'odom',
                 'freq': 10.0,
-                # Empty => start odometry from pose 0 immediately. Otherwise rf2o
-                # waits forever for an initial pose on /base_pose_ground_truth.
                 'init_pose_from_topic': '',
             }],
-            # rf2o INFO-logs odom every scan; raise threshold to quiet the spam.
             arguments=['--ros-args', '--log-level', 'warn'],
             output='screen',
         ),

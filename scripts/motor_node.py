@@ -62,7 +62,7 @@ class MotorDriverNode(Node):
     def on_watchdog_timeout(self):
         if self._moving:
             motors.setSpeeds(0, 0)
-            self.get_logger().warn('cmd_vel watchdog timeout — motors stopped')
+            # self.get_logger().warn('cmd_vel watchdog timeout — motors stopped')
             self._moving = False
             self._left_vel = 0.0
             self._right_vel = 0.0
