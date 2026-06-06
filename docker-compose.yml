@@ -19,6 +19,13 @@ services:
     <<: *base
     command: python3 /ros_ws/scripts/motor_node.py
 
+  lidar:
+    <<: *base
+    privileged: true
+    devices:
+      - /dev/serial/by-id/usb-Silicon_Labs_CP2102_USB_to_UART_Bridge_378e61c45266254bb4500e3f0a5aacfe-if00-port0:/dev/ttyUSB0
+    command: ros2 launch /ros_ws/launch/lidar.launch.py
+
   robot_description:
     <<: *base
     command: ros2 launch /ros_ws/launch/robot.launch.py
