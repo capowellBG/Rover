@@ -55,3 +55,19 @@ commanded to. Ruled out CPU, power, and scan mode (all measured).
 (~11 Hz, ~165 ms latency). Wheel encoders + IMU fused odom (50–100 Hz) is the
 proper upgrade, with slam/rf2o correcting drift. `motor_driver` exists; encoders
 are the missing piece.
+
+---
+
+## Saving the slam_toolbox map
+
+Once the map is built, serialize it to `maps/my_map.posegraph` + `maps/my_map.data`:
+
+```bash
+docker compose exec lidar bash -c "source /opt/ros/humble/setup.bash && source /opt/overlay_ws/install/setup.bash && ros2 service call /slam_toolbox/serialize_map slam_toolbox/srv/SerializePoseGraph '{filename: /ros_ws/maps/my_map}'"
+```
+
+To reload the map on next startup
+
+```bash
+docker compose exec lidar bash -c "source /opt/ros/humble/setup.bash && source /opt/overlay_ws/install/setup.bash && ros2 service call /slam_toolbox/deserialize_map slam_toolbox/srv/DeserializePoseGraph '{filename: /ros_ws/maps/my_map, match_type: 2, initial_pose: {x: 0.0, y: 0.0, theta: 0.0}}'"
+```
