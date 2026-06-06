@@ -1,4 +1,5 @@
 import lgpio
+import time
 
 # Motor speeds: -MAX_SPEED to MAX_SPEED (480 for historical compatibility)
 _max_speed = 480
@@ -35,6 +36,7 @@ class Motor(object):
         lgpio.gpio_claim_output(_h, en_pin)
         lgpio.gpio_claim_output(_h, pwm_pin)
         lgpio.gpio_write(_h, en_pin, 1)
+        time.sleep(0.05)  # let FLT pull-up settle before first fault read
 
     def setSpeed(self, speed):
         if speed < 0:
