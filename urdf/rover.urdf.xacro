@@ -20,6 +20,16 @@
   <xacro:property name="tread_block_w" value="${2.0 * pi * tread_block_r / tread_count - tread_gap}"/>
   <xacro:property name="tread_block_l" value="${wheel_length - 0.015}"/>
 
+  <!-- Ground-projection frame: sits on the floor directly under base_link so the
+       2D map/odom plane lands at the floor instead of through the chassis.
+       0.1012 = wheel_joint z (0.025) + wheel_radius (0.0762). -->
+  <link name="base_footprint"/>
+  <joint name="base_footprint_joint" type="fixed">
+    <parent link="base_footprint"/>
+    <child link="base_link"/>
+    <origin xyz="0 0 0.1012" rpy="0 0 0"/>
+  </joint>
+
   <link name="base_link">
     <visual><geometry><box size="0.254 0.2159 0.05"/></geometry><origin xyz="0 0 -0.025"/><material name="gray"/></visual>
     <visual><geometry><box size="0.127 0.0762 0.1016"/></geometry><origin xyz="-0.0635 0 0.0508"/><material name="yellow"/></visual>
