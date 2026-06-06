@@ -11,6 +11,14 @@ x-service: &base
 
 services:
 
+  foxglove_bridge:
+    <<: *base
+    command: ros2 run foxglove_bridge foxglove_bridge
+
   motor_driver:
     <<: *base
-    command: python3 /ros_ws/scripts/motor_test.py
+    command: python3 /ros_ws/scripts/motor_node.py
+
+  robot_description:
+    <<: *base
+    command: ros2 launch /ros_ws/launch/robot.launch.py

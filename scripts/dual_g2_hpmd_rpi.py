@@ -70,7 +70,7 @@ class Motors(object):
         self.motor2 = Motor(_pin_M2PWM, _pin_M2DIR, _pin_M2EN, _pin_M2FLT)
 
     def setSpeeds(self, m1_speed, m2_speed):
-        self.motor1.setSpeed(m1_speed)
+        self.motor1.setSpeed(-m1_speed)
         self.motor2.setSpeed(m2_speed)
 
     def enable(self):
