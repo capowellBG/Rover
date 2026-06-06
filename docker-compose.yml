@@ -7,54 +7,8 @@ x-service: &base
     - .:/ros_ws
 
 services:
-  foxglove_bridge:
-    <<: *base
-    command: ros2 run foxglove_bridge foxglove_bridge
-
-  robot_description:
-    <<: *base
-    command: ros2 launch launch/robot.launch.py
 
   motor_driver:
     <<: *base
     privileged: true
-    command: python3 /ros_ws/motor_node.py
-
-  lidar:
-    <<: *base
-    privileged: true
-    devices:
-      - /dev/ttyUSB0:/dev/ttyUSB0
-    command: ros2 launch launch/lidar.launch.py
-
-  # camera:
-  #   <<: *base
-  #   privileged: true
-  #   devices:
-  #     - /dev/bus/usb:/dev/bus/usb
-  #   command: ros2 launch realsense2_camera rs_launch.py config_file:=/ros_ws/config/camera_config.yaml
-
-  # camera_tf:
-  #   <<: *base
-  #   command: >-
-  #     ros2 run tf2_ros static_transform_publisher
-  #       --frame-id base_link
-  #       --child-frame-id camera_link
-  #       --x 0.0381 --y 0 --z 0.2667
-  #       --roll 0 --pitch 0 --yaw 0
-  
-  # rtabmap:
-  #   <<: *base
-  #   command: >-
-  #     ros2 launch rtabmap_launch rtabmap.launch.py
-  #       rgb_topic:=/camera/camera/color/image_raw
-  #       depth_topic:=/camera/camera/aligned_depth_to_color/image_raw
-  #       camera_info_topic:=/camera/camera/color/camera_info
-  #       imu_topic:=/camera/camera/imu
-  #       frame_id:=base_link
-  #       cfg:=/ros_ws/config/rtabmap_config.ini
-  #       database_path:=/ros_ws/rtabmap_data/rtabmap.db
-  #       qos:=1
-  #       delete_db_on_start:=true
-  #       rviz:=false
-  #       rtabmap_viz:=false
+    command: python3 /ros_ws/motor_test.py
