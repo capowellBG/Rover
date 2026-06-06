@@ -80,18 +80,50 @@
   <xacro:wheel name="rear_right"  x="-0.1016" y="-0.13335"/>
 
   <!-- RPLIDAR A2M12 — mounted in front of the yellow electronics box -->
+  <xacro:property name="lidar_radius" value="0.0381"/>
+  <xacro:property name="lidar_length" value="0.04445"/>
+  <xacro:property name="lidar_x"      value="0.0508"/>  <!-- 2" forward of base_link -->
+  <xacro:property name="lidar_z"      value="0.127"/>   <!-- 5" up from base_link -->
+
   <link name="laser">
     <visual>
-      <geometry><cylinder radius="0.0381" length="0.04445"/></geometry>
+      <geometry><cylinder radius="${lidar_radius}" length="${lidar_length}"/></geometry>
       <material name="lidar_blue"><color rgba="0.1 0.4 0.8 1.0"/></material>
     </visual>
-    <collision><geometry><cylinder radius="0.0381" length="0.04445"/></geometry></collision>
+    <collision><geometry><cylinder radius="${lidar_radius}" length="${lidar_length}"/></geometry></collision>
     <inertial><mass value="0.17"/><inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/></inertial>
   </link>
   <joint name="laser_joint" type="fixed">
     <parent link="base_link"/>
     <child link="laser"/>
-    <origin xyz="0.0508 0.0 0.238" rpy="0 0 ${pi}"/>
+    <origin xyz="${lidar_x} 0.0 ${lidar_z}" rpy="0 0 ${pi}"/>
   </joint>
+
+  <!-- Intel RealSense D455 — rough model (~124 x 26 x 29 mm, W x H x D): grey
+       bar body + black glass front. This link IS camera_link (the realsense
+       root frame, +x forward), so the driver's optical frames hang off it. -->
+  <xacro:macro name="d455_camera" params="name parent xyz rpy">
+    <link name="${name}">
+      <visual> <!-- grey body -->
+        <geometry><box size="0.029 0.124 0.026"/></geometry>
+        <material name="gray"/>
+      </visual>
+      <visual> <!-- black glass front (lens window) -->
+        <origin xyz="0.0145 0 0"/>
+        <geometry><box size="0.004 0.108 0.020"/></geometry>
+        <material name="black"/>
+      </visual>
+      <inertial><mass value="0.072"/><inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/></inertial>
+    </link>
+    <joint name="${name}_joint" type="fixed">
+      <parent link="${parent}"/>
+      <child link="${name}"/>
+      <origin xyz="${xyz}" rpy="${rpy}"/>
+    </joint>
+  </xacro:macro>
+
+  <!-- 5" forward, 3.25" up from base_link -->
+  <xacro:d455_camera name="camera_link" parent="base_link" rpy="0 0 0"
+      xyz="0.127 0 0.08255"/>
 
 </robot>

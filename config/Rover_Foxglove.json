@@ -3,13 +3,13 @@
     "3D!2i50lg1": {
       "cameraState": {
         "perspective": true,
-        "distance": 3.68051820470399,
-        "phi": 63.40588702016347,
-        "thetaOffset": 71.45885683129033,
+        "distance": 5.547791462414488,
+        "phi": 67.6077204061967,
+        "thetaOffset": 107.17265569826971,
         "targetOffset": [
-          0.043893212115861814,
-          0.15827441338891354,
-          -6.210792192485823e-18
+          0.04448078064809693,
+          0.15584116265322198,
+          -6.210792192485824e-18
         ],
         "target": [
           0,
@@ -57,6 +57,21 @@
         },
         "frame:base_footprint": {
           "visible": true
+        },
+        "frame:camera_color_frame": {
+          "visible": false
+        },
+        "frame:camera_color_optical_frame": {
+          "visible": false
+        },
+        "frame:camera_depth_frame": {
+          "visible": false
+        },
+        "frame:camera_depth_optical_frame": {
+          "visible": false
+        },
+        "frame:camera_link": {
+          "visible": false
         }
       },
       "topics": {
@@ -64,7 +79,7 @@
           "visible": true
         },
         "/scan": {
-          "visible": true,
+          "visible": false,
           "colorField": "intensity",
           "colorMode": "flat",
           "colorMap": "turbo",
@@ -80,11 +95,51 @@
         "/map": {
           "visible": true,
           "drawBehind": false
+        },
+        "/camera/camera/depth/image_rect_raw/compressedDepth": {
+          "visible": false,
+          "cameraInfoTopic": "/camera/camera/depth/camera_info",
+          "projectionFrameId": "map",
+          "renderMode": "pointCloud",
+          "siblingRgbTopic": "",
+          "distanceType": "zAxis",
+          "colorMap": "turbo",
+          "colorMode": "colormap",
+          "gradient": [
+            "#914040ff",
+            "#0bff00ff"
+          ]
+        },
+        "/camera/camera/color/image_raw": {
+          "visible": false,
+          "frameLocked": true,
+          "cameraInfoTopic": "/camera/camera/color/camera_info",
+          "distance": 1,
+          "planarProjectionFactor": 0,
+          "renderMode": "default",
+          "projectionFrameId": "map",
+          "color": "#ffffff",
+          "rectifyImage": true,
+          "pointSize": 1.5,
+          "syncModeEnabled": false
+        },
+        "/camera/camera/depth/image_rect_raw": {
+          "visible": false,
+          "frameLocked": true,
+          "cameraInfoTopic": "/camera/camera/depth/camera_info",
+          "distance": 1,
+          "planarProjectionFactor": 0,
+          "renderMode": "default",
+          "projectionFrameId": "map",
+          "color": "#ffffff",
+          "rectifyImage": true,
+          "pointSize": 1.5,
+          "syncModeEnabled": false
         }
       },
       "layers": {
         "grid": {
-          "visible": true,
+          "visible": false,
           "drawBehind": false,
           "instanceId": "3a7edd74-b122-4cbe-b9a6-043d04c1fd25",
           "layerId": "foxglove.Grid",
@@ -124,23 +179,69 @@
       "autoSendStopOnRelease": true,
       "upButton": {
         "field": "linear-x",
-        "value": 0.25
+        "value": 0.5
       },
       "downButton": {
         "field": "linear-x",
-        "value": -0.25
+        "value": -0.5
       },
       "leftButton": {
         "field": "angular-z",
-        "value": 0.25
+        "value": 0.3
       },
       "rightButton": {
         "field": "angular-z",
-        "value": -0.25
+        "value": -0.3
       },
       "stopButton": {
         "field": "linear-x",
         "value": 0
+      }
+    },
+    "Image!4hwe7pj": {
+      "cameraState": {
+        "distance": 20,
+        "perspective": true,
+        "phi": 60,
+        "target": [
+          0,
+          0,
+          0
+        ],
+        "targetOffset": [
+          0,
+          0,
+          0
+        ],
+        "targetOrientation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "thetaOffset": 60,
+        "fovy": 45,
+        "near": 0.5,
+        "far": 5000
+      },
+      "followMode": "follow-pose",
+      "scene": {},
+      "transforms": {},
+      "topics": {},
+      "layers": {},
+      "publish": {
+        "type": "point",
+        "poseTopic": "/move_base_simple/goal",
+        "pointTopic": "/clicked_point",
+        "poseEstimateTopic": "/initialpose",
+        "poseEstimateXDeviation": 0.5,
+        "poseEstimateYDeviation": 0.5,
+        "poseEstimateThetaDeviation": 0.26179939
+      },
+      "synchronize": false,
+      "imageMode": {
+        "imageTopic": "/camera/camera/color/image_raw/compressed",
+        "calibrationTopic": "/camera/camera/color/camera_info"
       }
     }
   },
@@ -152,7 +253,11 @@
   "layout": {
     "direction": "row",
     "first": "3D!2i50lg1",
-    "second": "Teleop!2uhr0kb",
+    "second": {
+      "first": "Teleop!2uhr0kb",
+      "second": "Image!4hwe7pj",
+      "direction": "column"
+    },
     "splitPercentage": 80.6892067620286
   }
 }

@@ -29,3 +29,10 @@ services:
   robot_description:
     <<: *base
     command: ros2 launch /ros_ws/launch/robot.launch.py
+
+  camera:
+    <<: *base
+    privileged: true
+    devices:
+      - /dev/bus/usb:/dev/bus/usb
+    command: ros2 launch realsense2_camera rs_launch.py config_file:=/ros_ws/config/camera_config.yaml

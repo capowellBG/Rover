@@ -3,3 +3,4 @@ pigpio-master/
 rtabmap_data/
 **/__pycache__/
 core.*
+*nfy0

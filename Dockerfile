@@ -14,6 +14,8 @@ RUN apt-get update && apt-get install -y \
     ros-humble-xacro \
     ros-humble-rplidar-ros \
     ros-humble-slam-toolbox \
+    ros-humble-realsense2-camera \
+    ros-humble-image-transport-plugins \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
