@@ -5,10 +5,12 @@ x-service: &base
   entrypoint: /ros_entrypoint.sh
   volumes:
     - .:/ros_ws
+  devices:
+    - /dev/gpiochip0:/dev/gpiochip0
+  privileged: true
 
 services:
 
   motor_driver:
     <<: *base
-    privileged: true
-    command: python3 /ros_ws/motor_test.py
+    command: python3 /ros_ws/scripts/motor_test.py

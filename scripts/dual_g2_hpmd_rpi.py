@@ -1,14 +1,6 @@
-import pigpio
+import lgpio
 
-_pi = pigpio.pi()
-if not _pi.connected:
-    raise IOError("Can't connect to pigpio")
-
-# Motor speeds for this library are specified as numbers between -MAX_SPEED and
-# MAX_SPEED, inclusive.
-# This has a value of 480 for historical reasons/to maintain compatibility with
-# older libraries for other Pololu boards (which used WiringPi to set up the
-# hardware PWM directly).
+# Motor speeds: -MAX_SPEED to MAX_SPEED (480 for historical compatibility)
 _max_speed = 480
 MAX_SPEED = _max_speed
 
@@ -21,6 +13,14 @@ _pin_M2EN = 23
 _pin_M1DIR = 24
 _pin_M2DIR = 25
 
+_PWM_FREQ = 2000  # Hz — Pi 5 RP1 chardev caps software PWM well below 20kHz
+
+# Pi 5 RP1 is /dev/gpiochip0 (gpiochip4 is a symlink that Docker can't resolve)
+_h = lgpio.gpiochip_open(0)
+if _h < 0:
+    raise IOError("Can't open gpiochip0 — is /dev/gpiochip0 accessible?")
+
+
 class Motor(object):
     MAX_SPEED = _max_speed
 
@@ -30,8 +30,11 @@ class Motor(object):
         self.en_pin = en_pin
         self.flt_pin = flt_pin
 
-        _pi.set_pull_up_down(flt_pin, pigpio.PUD_UP) # make sure FLT is pulled up
-        _pi.write(en_pin, 1) # enable driver by default
+        lgpio.gpio_claim_input(_h, flt_pin, lgpio.SET_PULL_UP)
+        lgpio.gpio_claim_output(_h, dir_pin)
+        lgpio.gpio_claim_output(_h, en_pin)
+        lgpio.gpio_claim_output(_h, pwm_pin)
+        lgpio.gpio_write(_h, en_pin, 1)
 
     def setSpeed(self, speed):
         if speed < 0:
@@ -43,18 +46,19 @@ class Motor(object):
         if speed > MAX_SPEED:
             speed = MAX_SPEED
 
-        _pi.write(self.dir_pin, dir_value)
-        _pi.hardware_PWM(self.pwm_pin, 20000, int(speed * 6250 / 3));
-          # 20 kHz PWM, duty cycle in range 0-1000000 as expected by pigpio
+        duty = speed / MAX_SPEED * 100.0
+        lgpio.gpio_write(_h, self.dir_pin, dir_value)
+        lgpio.tx_pwm(_h, self.pwm_pin, _PWM_FREQ, duty)
 
     def enable(self):
-        _pi.write(self.en_pin, 1)
+        lgpio.gpio_write(_h, self.en_pin, 1)
 
     def disable(self):
-        _pi.write(self.en_pin, 0)
+        lgpio.gpio_write(_h, self.en_pin, 0)
 
     def getFault(self):
-        return not _pi.read(self.flt_pin)
+        return not lgpio.gpio_read(_h, self.flt_pin)
+
 
 class Motors(object):
     MAX_SPEED = _max_speed
@@ -79,11 +83,7 @@ class Motors(object):
         return self.motor1.getFault() or self.motor2.getFault()
 
     def forceStop(self):
-        # reinitialize the pigpio interface in case we interrupted another command
-        # (so this method works reliably when called from an exception handler)
-        global _pi
-        _pi.stop()
-        _pi = pigpio.pi()
         self.setSpeeds(0, 0)
+
 
 motors = Motors()
