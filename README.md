@@ -25,10 +25,6 @@ sudo nmcli con up Rover-Hotspot
 sudo nmcli con up BG
 ```
 
-```bash
-ssh brasfield@10.42.0.1
-```
-
 
 ## Notes
 

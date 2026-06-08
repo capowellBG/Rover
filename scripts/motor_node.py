@@ -9,8 +9,20 @@ from dual_g2_hpmd_rpi import motors, MAX_SPEED
 
 WATCHDOG_TIMEOUT = 0.5   # seconds
 PUBLISH_HZ = 30.0
-# Tune this to match actual top wheel speed; affects visual spin rate only
-MAX_WHEEL_RAD_S = 6.0
+# Robot's wheel angular speed at full motor throttle. Sets BOTH the cmd_vel m/s<->throttle
+# scaling and the visual spin rate, so calibrate it: drive at full throttle over a known
+# distance, then MAX_WHEEL_RAD_S = (distance / time) / WHEEL_RADIUS.
+MAX_WHEEL_RAD_S = 6.4
+
+# Drive geometry (from urdf/rover.urdf.xacro): wheels at y = +/-0.13335, radius 0.0762
+WHEEL_RADIUS = 0.0762            # m
+WHEEL_SEPARATION = 0.2667        # m  (track width = 2 * 0.13335)
+MAX_LINEAR_SPEED = MAX_WHEEL_RAD_S * WHEEL_RADIUS  # m/s at full throttle (~0.49)
+
+# Skid-steer slip/friction: all 4 tires must skid sideways to rotate, so the geometric
+# track width badly under-drives turns. This multiplies the turn command to compensate.
+# Higher = sharper turns. Turn saturates around omega = MAX_LINEAR_SPEED / (WHEEL_SEPARATION/2 * TURN_GAIN).
+TURN_GAIN = 4.0
 
 JOINTS = ['front_left_joint', 'front_right_joint', 'rear_left_joint', 'rear_right_joint']
 
@@ -30,11 +42,15 @@ class MotorDriverNode(Node):
         self.get_logger().info('Motor driver node started')
 
     def on_cmd_vel(self, msg):
-        linear = -msg.linear.x   # -1.0 to 1.0
-        angular = -msg.angular.z  # -1.0 to 1.0
+        # Differential drive: body twist (m/s, rad/s) -> per-wheel linear speed (m/s).
+        # TURN_GAIN inflates the effective track width to overcome skid-steer slip/friction.
+        turn = msg.angular.z * (WHEEL_SEPARATION / 2.0) * TURN_GAIN
+        v_left = msg.linear.x - turn
+        v_right = msg.linear.x + turn
 
-        left = max(-1.0, min(1.0, linear - angular))
-        right = max(-1.0, min(1.0, linear + angular))
+        # Normalize to motor throttle [-1, 1]; negated for this drive's wiring polarity
+        left = -max(-1.0, min(1.0, v_left / MAX_LINEAR_SPEED))
+        right = -max(-1.0, min(1.0, v_right / MAX_LINEAR_SPEED))
 
         motors.setSpeeds(int(left * MAX_SPEED), int(right * MAX_SPEED))
         self._left_vel = left * MAX_WHEEL_RAD_S

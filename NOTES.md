@@ -1,5 +1,11 @@
 # Rover — Working Notes
 
+## Sync Windows Clock
+```powershell
+net start w32time
+w32tm /resync /force
+```
+
 ## System changes made on the Pi (not in git — re-apply on a fresh SD card)
 These edits live in `/boot/firmware/config.txt`. Each needs a reboot.
 
