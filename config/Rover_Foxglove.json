@@ -3,13 +3,13 @@
     "3D!2i50lg1": {
       "cameraState": {
         "perspective": true,
-        "distance": 5.547791462414488,
-        "phi": 67.6077204061967,
-        "thetaOffset": 107.17265569826971,
+        "distance": 9.265824603145878,
+        "phi": 40.87037815862456,
+        "thetaOffset": 25.623342175067883,
         "targetOffset": [
-          0.04448078064809693,
-          0.15584116265322198,
-          -6.210792192485824e-18
+          0.1807343527688127,
+          -0.10405864189804588,
+          1.0546452002171794e-18
         ],
         "target": [
           0,
@@ -26,7 +26,7 @@
         "near": 0.5,
         "far": 5000
       },
-      "followMode": "follow-heading",
+      "followMode": "follow-position",
       "scene": {
         "transforms": {
           "visible": true,
@@ -38,7 +38,7 @@
           "visible": false
         },
         "frame:base_link": {
-          "visible": false
+          "visible": true
         },
         "frame:front_left_wheel": {
           "visible": false
@@ -135,6 +135,18 @@
           "rectifyImage": true,
           "pointSize": 1.5,
           "syncModeEnabled": false
+        },
+        "/camera/camera/color/image_raw/compressedDepth": {
+          "visible": false
+        },
+        "/initialpose": {
+          "visible": false
+        },
+        "/goal_pose": {
+          "visible": false
+        },
+        "/plan": {
+          "visible": true
         }
       },
       "layers": {
@@ -160,8 +172,8 @@
         }
       },
       "publish": {
-        "type": "point",
-        "poseTopic": "/move_base_simple/goal",
+        "type": "pose",
+        "poseTopic": "/goal_pose",
         "pointTopic": "/clicked_point",
         "poseEstimateTopic": "/initialpose",
         "poseEstimateXDeviation": 0.5,
@@ -170,7 +182,7 @@
       },
       "synchronize": false,
       "imageMode": {},
-      "followTf": "base_footprint",
+      "followTf": "map",
       "fixedFrame": "map"
     },
     "Teleop!2uhr0kb": {
@@ -187,11 +199,11 @@
       },
       "leftButton": {
         "field": "angular-z",
-        "value": 0.3
+        "value": 0.5
       },
       "rightButton": {
         "field": "angular-z",
-        "value": -0.3
+        "value": -0.5
       },
       "stopButton": {
         "field": "linear-x",
@@ -243,6 +255,26 @@
         "imageTopic": "/camera/camera/color/image_raw/compressed",
         "calibrationTopic": "/camera/camera/color/camera_info"
       }
+    },
+    "CallService!39t24pq": {
+      "requestPayload": "{\n  \"command\": 1\n}",
+      "layout": "vertical",
+      "timeoutSeconds": 10,
+      "serviceName": "/lifecycle_manager_navigation/manage_nodes",
+      "foxglovePanelTitle": "PAUSE",
+      "buttonText": "PAUSE",
+      "editingMode": false,
+      "buttonColor": "#ffbc00"
+    },
+    "CallService!2tamusg": {
+      "requestPayload": "{\n  \"command\": 2\n}",
+      "layout": "vertical",
+      "timeoutSeconds": 10,
+      "serviceName": "/lifecycle_manager_navigation/manage_nodes",
+      "foxglovePanelTitle": "RESUME",
+      "buttonText": "RESUME",
+      "buttonColor": "#9cff82",
+      "editingMode": false
     }
   },
   "globalVariables": {},
@@ -255,7 +287,15 @@
     "first": "3D!2i50lg1",
     "second": {
       "first": "Teleop!2uhr0kb",
-      "second": "Image!4hwe7pj",
+      "second": {
+        "first": "Image!4hwe7pj",
+        "second": {
+          "first": "CallService!39t24pq",
+          "second": "CallService!2tamusg",
+          "direction": "column"
+        },
+        "direction": "column"
+      },
       "direction": "column"
     },
     "splitPercentage": 80.6892067620286
