@@ -16,6 +16,8 @@ RUN apt-get update && apt-get install -y \
     ros-humble-slam-toolbox \
     ros-humble-realsense2-camera \
     ros-humble-image-transport-plugins \
+    ros-humble-navigation2 \
+    ros-humble-nav2-bringup \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
