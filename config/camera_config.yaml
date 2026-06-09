@@ -1,7 +1,8 @@
 depth_module.depth_profile: "640x480x15"
 rgb_camera.color_profile: "640x480x15"
 align_depth.enable: false
-pointcloud.enable: false
+# ARM/NEON build names the pointcloud filter "pointcloud__neon_" (not "pointcloud")
+pointcloud__neon_.enable: true
 enable_gyro: false
 enable_accel: false
 depth_module.image_transport: compressedDepth

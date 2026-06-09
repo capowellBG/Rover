@@ -1,9 +1,40 @@
 # Rover — Working Notes
 
+## Saving the slam_toolbox map
+
+Once the map is built, serialize it to `maps/my_map.posegraph` + `maps/my_map.data`:
+
+```bash
+docker compose exec lidar bash -c "source /opt/ros/humble/setup.bash && source /opt/overlay_ws/install/setup.bash && ros2 service call /slam_toolbox/serialize_map slam_toolbox/srv/SerializePoseGraph '{filename: /ros_ws/maps/my_map}'"
+```
+
+To reload the map on next startup
+
+```bash
+docker compose exec lidar bash -c "source /opt/ros/humble/setup.bash && source /opt/overlay_ws/install/setup.bash && ros2 service call /slam_toolbox/deserialize_map slam_toolbox/srv/DeserializePoseGraph '{filename: /ros_ws/maps/my_map, match_type: 2, initial_pose: {x: 0.0, y: 0.0, theta: 0.0}}'"
+```
+
 ## Sync Windows Clock
 ```powershell
 net start w32time
 w32tm /resync /force
+```
+
+## Wi-Fi
+
+```bash
+sudo nmcli con add type wifi ifname wlan0 con-name "Rover-Hotspot" autoconnect no ssid "Rover"
+sudo nmcli con modify "Rover-Hotspot" 802-11-wireless.mode ap 802-11-wireless.band bg ipv4.method shared
+sudo nmcli con modify "Rover-Hotspot" wifi-sec.key-mgmt wpa-psk wifi-sec.psk 'B&GSP!R!T'
+sudo nmcli con modify "Rover-Hotspot" ipv4.addresses 10.42.0.1/24
+```
+
+```bash
+sudo nmcli con up Rover-Hotspot
+```
+
+```bash
+sudo nmcli con up BG
 ```
 
 ## System changes made on the Pi (not in git — re-apply on a fresh SD card)
@@ -63,17 +94,3 @@ proper upgrade, with slam/rf2o correcting drift. `motor_driver` exists; encoders
 are the missing piece.
 
 ---
-
-## Saving the slam_toolbox map
-
-Once the map is built, serialize it to `maps/my_map.posegraph` + `maps/my_map.data`:
-
-```bash
-docker compose exec lidar bash -c "source /opt/ros/humble/setup.bash && source /opt/overlay_ws/install/setup.bash && ros2 service call /slam_toolbox/serialize_map slam_toolbox/srv/SerializePoseGraph '{filename: /ros_ws/maps/my_map}'"
-```
-
-To reload the map on next startup
-
-```bash
-docker compose exec lidar bash -c "source /opt/ros/humble/setup.bash && source /opt/overlay_ws/install/setup.bash && ros2 service call /slam_toolbox/deserialize_map slam_toolbox/srv/DeserializePoseGraph '{filename: /ros_ws/maps/my_map, match_type: 2, initial_pose: {x: 0.0, y: 0.0, theta: 0.0}}'"
-```
