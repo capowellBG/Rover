@@ -165,11 +165,17 @@ class JoystickTeleopNode(Node):
         now = time.monotonic()
         if active:
             self._last_active = now
-            twist = Twist()
             # RT forward, LT reverse; both can be read at once so they just sum.
-            twist.linear.x = (self._rt - self._lt) * self._max_linear
+            throttle = self._rt - self._lt
             # Left stick: push left -> turn left (CCW, +z per REP-103).
-            twist.angular.z = -self._turn * self._max_angular
+            turn = -self._turn * self._max_angular
+            # In reverse, invert turning so it steers like a car backing up:
+            # the same stick direction flips the wheel differential.
+            if throttle < 0.0:
+                turn = -turn
+            twist = Twist()
+            twist.linear.x = throttle * self._max_linear
+            twist.angular.z = turn
             self._pub.publish(twist)
         elif now - self._last_active < STOP_GRACE:
             # Just released: a short burst of zeros stops the robot promptly,
