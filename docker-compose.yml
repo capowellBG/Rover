@@ -19,6 +19,15 @@ services:
     <<: *base
     command: python3 /ros_ws/scripts/motor_node.py
 
+  joystick:
+    <<: *base
+    # /dev/input mounted (not just the privileged /dev) so a controller
+    # paired after the container starts still shows up as /dev/input/js0.
+    volumes:
+      - .:/ros_ws
+      - /dev/input:/dev/input
+    command: python3 /ros_ws/scripts/joystick_node.py
+
   lidar:
     <<: *base
     privileged: true

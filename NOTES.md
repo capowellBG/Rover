@@ -51,6 +51,31 @@ dtoverlay=pwm-2chan,pin=12,func=4,pin2=13,func2=4
 Lidar gotcha: the `ttyUSB` number is unstable — `docker-compose.yml` uses the
 stable `/dev/serial/by-id/usb-Silicon_Labs_CP2102_...` path, not `/dev/ttyUSB0`.
 
+### Xbox controller over Bluetooth — disable ERTM
+The Xbox pad pairs but then *immediately disconnects* unless Bluetooth ERTM is
+off. The `bluetooth` module is loadable, so persist it via modprobe.d:
+
+```bash
+# apply now (module is already loaded)
+echo Y | sudo tee /sys/module/bluetooth/parameters/disable_ertm
+# persist across reboots
+echo 'options bluetooth disable_ertm=Y' | sudo tee /etc/modprobe.d/xbox-bt.conf
+```
+
+Pair once (then `trust` so it auto-reconnects on boot):
+```bash
+bluetoothctl
+  scan on            # note the "Xbox Wireless Controller" MAC
+  pair  <MAC>
+  trust <MAC>
+  connect <MAC>
+```
+
+The pad shows up as `/dev/input/js0` (joydev auto-loads). The `joystick`
+compose service drives `cmd_vel` from it — see `scripts/joystick_node.py`. Axis
+numbers there assume the xpad mapping; the stock Bluetooth driver may differ, so
+verify with `jstest /dev/input/js0` if controls are wrong.
+
 ---
 
 ## Motor PWM (silent drive)
