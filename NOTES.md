@@ -128,3 +128,36 @@ proper upgrade, with slam/rf2o correcting drift. `motor_driver` exists; encoders
 are the missing piece.
 
 ---
+
+## Odom/SLAM architecture decision (Topology 1)
+**Decision:** odometry from RTAB-Map **visual-inertial** odom (`rgbd_odometry` +
+D455 IMU); map building **and loop closure stay on slam_toolbox** (LiDAR).
+Decouple the odom engine from the map engine.
+
+**Why:** rf2o (any 2D-lidar odom) slips down long straight hallways — the scan is
+identical frame-to-frame along the travel axis, so forward translation is
+unobservable. The forward camera sees features moving toward it (doors, floor
+seams, lights) and observes that axis. Keep slam_toolbox for mapping because
+RGBD occupancy grids aren't as clean as the lidar ones.
+
+**TF ownership — exactly one writer each:**
+- `odom→base_footprint` ← `rgbd_odometry` (set rf2o `publish_tf:=False`, or drop it).
+- `map→odom` + occupancy grid ← slam_toolbox (unchanged).
+
+**D455 IMU** is currently off (`enable_gyro/accel: false` in `config/camera_config.yaml`).
+To enable it *cleanly*, build librealsense from source with
+`-DFORCE_RSUSB_BACKEND=ON` (RSUSB/libuvc backend) into `/opt/overlay_ws` — avoids
+host kernel patching, which is the fragile path that breaks on kernel updates.
+Then `enable_gyro/accel:=true`, `unite_imu_method:=2`, optionally
+`imu_filter_madgwick` → `/imu/data`. For `rgbd_odometry` also set
+`align_depth:=true`, `640x480x30`, and drop the pointcloud.
+
+**Staging:** (1) visual-only `rgbd_odometry` replacing rf2o's TF — corridor fix,
+no rebuild. (2) add IMU (RSUSB build) → visual-inertial. (3) optional true
+3-sensor LVIO: rf2o back as a *non-TF* velocity source + `robot_localization` EKF,
+assigning DoF by sensor — **vx←camera, vy+vyaw←laser (360°), yaw-rate/gravity←IMU**.
+Per-DoF assignment structurally excludes the laser's corridor slip (never take vx
+from the laser). Tightly-coupled single-node LVIO (LVI-SAM / FAST-LIVO) ruled out
+— too heavy for the Pi 5.
+
+---

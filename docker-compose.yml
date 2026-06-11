@@ -30,8 +30,8 @@ services:
     <<: *base
     privileged: true
     # command: ros2 launch /ros_ws/launch/lidar.launch.py slam_mode:=mapping
-    # command: ros2 launch /ros_ws/launch/lidar.launch.py slam_mode:=localization
-    command: ros2 launch /ros_ws/launch/lidar.launch.py slam_mode:=continue
+    command: ros2 launch /ros_ws/launch/lidar.launch.py slam_mode:=localization
+    # command: ros2 launch /ros_ws/launch/lidar.launch.py slam_mode:=continue
 
   robot_description:
     <<: *base
