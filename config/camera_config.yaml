@@ -3,6 +3,7 @@ rgb_camera.color_profile: "640x480x15"
 align_depth.enable: false
 # ARM/NEON build names the pointcloud filter "pointcloud__neon_" (not "pointcloud")
 pointcloud__neon_.enable: true
-enable_gyro: false
-enable_accel: false
+enable_gyro: true
+enable_accel: true
+unite_imu_method: 2  # 0=none 1=copy 2=linear_interpolation -> single combined /imu
 depth_module.image_transport: compressedDepth

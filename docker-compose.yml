@@ -26,20 +26,20 @@ services:
     <<: *base
     command: python3 /ros_ws/scripts/joystick_node.py
 
-  lidar:
-    <<: *base
-    privileged: true
-    # command: ros2 launch /ros_ws/launch/lidar.launch.py slam_mode:=mapping
-    command: ros2 launch /ros_ws/launch/lidar.launch.py slam_mode:=localization
-    # command: ros2 launch /ros_ws/launch/lidar.launch.py slam_mode:=continue
+  # lidar:
+  #   <<: *base
+  #   privileged: true
+  #   # command: ros2 launch /ros_ws/launch/lidar.launch.py slam_mode:=mapping
+  #   command: ros2 launch /ros_ws/launch/lidar.launch.py slam_mode:=localization
+  #   # command: ros2 launch /ros_ws/launch/lidar.launch.py slam_mode:=continue
 
-  robot_description:
-    <<: *base
-    command: ros2 launch /ros_ws/launch/robot.launch.py
+  # robot_description:
+  #   <<: *base
+  #   command: ros2 launch /ros_ws/launch/robot.launch.py
 
-  nav2:
-    <<: *base
-    command: ros2 launch /ros_ws/launch/nav2.launch.py
+  # nav2:
+  #   <<: *base
+  #   command: ros2 launch /ros_ws/launch/nav2.launch.py
 
   camera:
     <<: *base

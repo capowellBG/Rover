@@ -1,8 +1,9 @@
 FROM ros:humble-ros-core
 
-# System Dependencies
+# System dependencies + shared build tooling (used by the librealsense source build)
 RUN apt-get update && apt-get install -y \
     python3-pip \
+    git build-essential cmake libusb-1.0-0-dev libssl-dev pkg-config \
     && pip3 install lgpio \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
@@ -21,26 +22,27 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# rf2o_laser_odometry has no Humble apt binary — build from source into an overlay
-RUN apt-get update && apt-get install -y \
-    git build-essential cmake \
-    python3-colcon-common-extensions python3-rosdep \
-    && rosdep init && rosdep update \
-    && mkdir -p /opt/overlay_ws/src \
-    && git clone https://github.com/MAPIRlab/rf2o_laser_odometry.git /opt/overlay_ws/src/rf2o_laser_odometry \
-    && rosdep install --from-paths /opt/overlay_ws/src --ignore-src -r -y \
-    && . /opt/ros/humble/setup.sh \
-    && cd /opt/overlay_ws \
-    && colcon build --merge-install \
-    && rm -rf /opt/overlay_ws/build /opt/overlay_ws/log /opt/overlay_ws/src \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+# librealsense from source, RSUSB backend — D455 IMU without host kernel patching
+RUN git clone https://github.com/IntelRealSense/librealsense.git -b v2.57.7 --depth 1 \
+    && cd librealsense \
+    && mkdir build && cd build \
+    && cmake .. \
+        -DFORCE_RSUSB_BACKEND=ON \
+        -DCMAKE_INSTALL_PREFIX=/opt/ros/humble \
+        -DCMAKE_INSTALL_LIBDIR=lib/aarch64-linux-gnu \
+        -DBUILD_EXAMPLES=OFF \
+        -DBUILD_GRAPHICAL_EXAMPLES=OFF \
+        -DBUILD_PYTHON_BINDINGS=OFF \
+        -DBUILD_UNIT_TESTS=OFF \
+        -DCMAKE_BUILD_TYPE=Release \
+    && make -j$(nproc) \
+    && make install \
+    && cd / && rm -rf librealsense
 
-# Source the overlay on top of the ROS underlay in the entrypoint
+# Source the ROS underlay in the entrypoint
 RUN cat > /ros_entrypoint.sh <<'EOF'
 #!/bin/bash
 set -e
 source /opt/ros/$ROS_DISTRO/setup.bash
-source /opt/overlay_ws/install/setup.bash
 exec "$@"
 EOF
