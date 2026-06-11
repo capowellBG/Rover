@@ -51,6 +51,20 @@ def launch_setup(context, *args, **kwargs):
             ],
             output='screen',
         )
+    elif slam_mode == 'continue':
+        # Load the saved pose-graph and keep mapping onto it (mapping node,
+        # not localization), so newly explored areas are added to my_map.
+        # Re-serialize afterward to persist the enlarged map.
+        slam_node = Node(
+            package='slam_toolbox',
+            executable='async_slam_toolbox_node',
+            name='slam_toolbox',
+            parameters=[
+                '/ros_ws/config/slam_toolbox_params.yaml',
+                {'mode': 'mapping', 'map_file_name': '/ros_ws/maps/my_map', 'map_start_at_dock': True},
+            ],
+            output='screen',
+        )
     else:
         slam_node = Node(
             package='slam_toolbox',

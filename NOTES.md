@@ -23,8 +23,17 @@ w32tm /resync /force
 ## Wi-Fi
 
 ```bash
+# Set the WiFi regulatory country (persists across reboots). Required once per Pi,
+# or 5 GHz AP won't start (default regdomain "00" forbids it). Verify: iw reg get
+sudo raspi-config nonint do_wifi_country US
+```
+
+```bash
+# 5 GHz hotspot (band a, ch 36) so WiFi doesn't collide with 2.4 GHz Bluetooth
+# on the same onboard chip -> fixes the controller dropping under load.
+# Needs the country set (above); clients must support 5 GHz.
 sudo nmcli con add type wifi ifname wlan0 con-name "Rover-Hotspot" autoconnect no ssid "Rover"
-sudo nmcli con modify "Rover-Hotspot" 802-11-wireless.mode ap 802-11-wireless.band bg ipv4.method shared
+sudo nmcli con modify "Rover-Hotspot" 802-11-wireless.mode ap 802-11-wireless.band a 802-11-wireless.channel 36 ipv4.method shared
 sudo nmcli con modify "Rover-Hotspot" wifi-sec.key-mgmt wpa-psk wifi-sec.psk 'B&GSP!R!T'
 sudo nmcli con modify "Rover-Hotspot" ipv4.addresses 10.42.0.1/24
 ```
