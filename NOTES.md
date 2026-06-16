@@ -46,6 +46,11 @@ sudo nmcli con up Rover-Hotspot
 sudo nmcli con up BG
 ```
 
+```bash
+sudo nmcli connection modify BG connection.autoconnect no
+sudo nmcli connection modify Rover-Hotspot connection.autoconnect yes
+```
+
 ## System changes made on the Pi (not in git — re-apply on a fresh SD card)
 These edits live in `/boot/firmware/config.txt`. Each needs a reboot.
 
@@ -143,6 +148,14 @@ RGBD occupancy grids aren't as clean as the lidar ones.
 **TF ownership — exactly one writer each:**
 - `odom→base_footprint` ← `rgbd_odometry` (set rf2o `publish_tf:=False`, or drop it).
 - `map→odom` + occupancy grid ← slam_toolbox (unchanged).
+
+**Implemented (visual-inertial odom):** `launch/camera_odom.launch.py` runs
+`imu_filter_madgwick` (raw `/camera/camera/imu` → oriented `/imu/data`, `use_mag:=false`)
+feeding `rtabmap_odom`'s `rgbd_odometry` (`frame_id:=base_footprint`, `odom_frame_id:=odom`,
+`publish_tf:=true`, `wait_imu_to_init:=true`, depth `aligned_depth_to_color`). Started by the
+`camera_odom` compose service; needs `camera` + `robot_description` up.
+**When LiDAR mapping is re-enabled, `lidar.launch.py` still sets rf2o `publish_tf: True` —
+flip it to `False` (or drop rf2o) so `rgbd_odometry` is the sole writer of `odom→base_footprint`.**
 
 **D455 IMU** is currently off (`enable_gyro/accel: false` in `config/camera_config.yaml`).
 To enable it *cleanly*, build librealsense from source with

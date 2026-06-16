@@ -1,5 +1,6 @@
 x-service: &base
   image: rover:latest
+  build: .
   network_mode: host
   ipc: host
   entrypoint: /ros_entrypoint.sh
@@ -33,9 +34,9 @@ services:
   #   command: ros2 launch /ros_ws/launch/lidar.launch.py slam_mode:=localization
   #   # command: ros2 launch /ros_ws/launch/lidar.launch.py slam_mode:=continue
 
-  # robot_description:
-  #   <<: *base
-  #   command: ros2 launch /ros_ws/launch/robot.launch.py
+  robot_description:
+    <<: *base
+    command: ros2 launch /ros_ws/launch/robot.launch.py
 
   # nav2:
   #   <<: *base
@@ -44,3 +45,9 @@ services:
   camera:
     <<: *base
     command: ros2 launch realsense2_camera rs_launch.py config_file:=/ros_ws/config/camera_config.yaml
+
+  # Visual-inertial odom (D455 + IMU) -> owns odom->base_footprint.
+  # Needs camera + robot_description up (TF: base_footprint->camera_link->optical frames).
+  camera_odom:
+    <<: *base
+    command: ros2 launch /ros_ws/launch/camera_odom.launch.py

@@ -1,8 +1,12 @@
 depth_module.depth_profile: "640x480x15"
 rgb_camera.color_profile: "640x480x15"
-align_depth.enable: false
+align_depth.enable: true
+# Group color+depth frames with nearest timestamps so rgbd_odometry pairs matched
+# frames (kills the "time difference between rgb and depth is high" warning).
+enable_sync: true
 # ARM/NEON build names the pointcloud filter "pointcloud__neon_" (not "pointcloud")
-pointcloud__neon_.enable: true
+# Odom-only: rgbd_odometry consumes the registered depth image, not a cloud. Off to free Pi CPU.
+pointcloud__neon_.enable: false
 enable_gyro: true
 enable_accel: true
 unite_imu_method: 2  # 0=none 1=copy 2=linear_interpolation -> single combined /imu
