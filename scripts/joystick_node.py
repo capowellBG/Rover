@@ -42,6 +42,11 @@ ANGULAR_MIN, ANGULAR_MAX = 0.3, 2.5     # rad/s
 LINEAR_DEFAULT, ANGULAR_DEFAULT = 0.35, 0.7
 LINEAR_STEP, ANGULAR_STEP = 0.05, 0.2
 
+# Slew-rate limits: how fast cmd_vel may change, to spare the IMU/camera abrupt
+# motion that disrupts visual-inertial odometry. Lower = gentler / longer ramp.
+LINEAR_ACCEL = 0.5    # m/s^2   (0 -> 0.35 m/s in ~0.7 s)
+ANGULAR_ACCEL = 1.5   # rad/s^2 (0 -> 0.7 rad/s in ~0.47 s)
+
 
 class JoystickTeleopNode(Node):
     def __init__(self):
@@ -57,6 +62,8 @@ class JoystickTeleopNode(Node):
         self._max_linear = LINEAR_DEFAULT
         self._max_angular = ANGULAR_DEFAULT
         self._last_active = 0.0   # monotonic time of last live input; gates publishing
+        self._cmd_lin = 0.0       # last published linear.x  (m/s), ramps toward target
+        self._cmd_ang = 0.0       # last published angular.z (rad/s), ramps toward target
 
         self._stop = False
         self._reader = threading.Thread(target=self._reader_loop, daemon=True)
@@ -155,14 +162,25 @@ class JoystickTeleopNode(Node):
     def _zero_inputs(self):
         self._rt = self._lt = self._turn = 0.0
         self._dpad_x = self._dpad_y = 0
+        # Snap the ramp to zero too: a controller disconnect/unplug must stop the
+        # robot promptly, not coast down the slew ramp like a normal release.
+        self._cmd_lin = self._cmd_ang = 0.0
 
     # --- Publishing ----------------------------------------------------------
+    @staticmethod
+    def _slew(current, target, max_delta):
+        # Step current toward target by at most max_delta this tick.
+        step = max(-max_delta, min(max_delta, target - current))
+        return current + step
+
     def _publish(self):
-        # Only touch cmd_vel while the controller is actually driving, so idle
-        # zeros don't stomp other publishers (Foxglove, nav2). With no pad
-        # connected the inputs stay zero, so we naturally stay silent too.
+        # Only touch cmd_vel while the controller is driving OR while the ramp is
+        # still decaying after release, so idle zeros don't stomp other publishers
+        # (Foxglove, nav2). With no pad connected the inputs stay zero, so the ramp
+        # rests at zero and we naturally stay silent too.
         active = self._rt > 0.0 or self._lt > 0.0 or self._turn != 0.0
         now = time.monotonic()
+
         if active:
             self._last_active = now
             # RT forward, LT reverse; both can be read at once so they just sum.
@@ -173,13 +191,30 @@ class JoystickTeleopNode(Node):
             # the same stick direction flips the wheel differential.
             if throttle < 0.0:
                 turn = -turn
+            target_lin = throttle * self._max_linear
+            target_ang = turn
+        else:
+            # Idle: ramp both axes down toward a stop.
+            target_lin = 0.0
+            target_ang = 0.0
+
+        # Rate-limit the published velocity so the IMU/camera don't see abrupt
+        # steps. dt = one publish tick; ACCEL * dt is the most we may change.
+        dt = 1.0 / PUBLISH_HZ
+        self._cmd_lin = self._slew(self._cmd_lin, target_lin, LINEAR_ACCEL * dt)
+        self._cmd_ang = self._slew(self._cmd_ang, target_ang, ANGULAR_ACCEL * dt)
+
+        moving = self._cmd_lin != 0.0 or self._cmd_ang != 0.0
+        if active or moving:
+            # Keep publishing while driving or while the ramp is still decaying,
+            # so release coasts smoothly to zero instead of cutting out.
             twist = Twist()
-            twist.linear.x = throttle * self._max_linear
-            twist.angular.z = turn
+            twist.linear.x = self._cmd_lin
+            twist.angular.z = self._cmd_ang
             self._pub.publish(twist)
         elif now - self._last_active < STOP_GRACE:
-            # Just released: a short burst of zeros stops the robot promptly,
-            # then we go silent and hand cmd_vel back to other sources.
+            # Ramp has reached zero just after release: a short burst of zeros
+            # holds the stop, then we go silent and hand cmd_vel back.
             self._pub.publish(Twist())
 
     def stop(self):
